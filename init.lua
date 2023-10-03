@@ -118,6 +118,10 @@ require("lazy").setup({
 		-- or                              , branch = '0.1.1',
 		dependencies = { "nvim-lua/plenary.nvim" },
 	},
+	{
+		"tpope/vim-fugitive",
+		cmd = "Git",
+	},
 })
 
 -- color scheme
