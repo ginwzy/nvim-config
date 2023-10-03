@@ -25,6 +25,104 @@ vim.keymap.set("n", "<Leader>]", "<C-i>", opt)
 -- https://www.reddit.com/r/vim/comments/2k4cbr/problem_with_gj_and_gk/
 vim.keymap.set("n", "j", [[v:count ? 'j' : 'gj']], { noremap = true, expr = true })
 vim.keymap.set("n", "k", [[v:count ? 'k' : 'gk']], { noremap = true, expr = true })
+-- lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		"--branch=stable", -- latest stable release
+		lazypath,
+	})
+end
+vim.opt.rtp:prepend(lazypath)
+require("lazy").setup({
+	{
+		event = "VeryLazy",
+		"hrsh7th/nvim-cmp",
+		dependencies = {
+			"neovim/nvim-lspconfig",
+			"hrsh7th/cmp-nvim-lsp",
+			"hrsh7th/cmp-buffer",
+			"hrsh7th/cmp-path",
+			"hrsh7th/cmp-cmdline",
+			"hrsh7th/nvim-cmp",
+			"L3MON4D3/LuaSnip",
+		},
+	},
+
+	{
+		"windwp/nvim-autopairs",
+		event = "VeryLazy",
+		config = function()
+			require("nvim-autopairs").setup({})
+		end,
+	},
+	{
+		event = "VeryLazy",
+		"williamboman/mason.nvim",
+		build = ":MasonUpdate", -- :MasonUpdate updates registry contents
+	},
+	{
+		event = "VeryLazy",
+		"jose-elias-alvarez/null-ls.nvim",
+		config = function()
+			local null_ls = require("null-ls")
+
+			local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+			null_ls.setup({
+				sources = {
+					null_ls.builtins.formatting.stylua,
+					null_ls.builtins.formatting.black,
+				},
+				on_attach = function(client, bufnr)
+					if client.supports_method("textDocument/formatting") then
+						vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+						vim.api.nvim_create_autocmd("BufWritePre", {
+							group = augroup,
+							buffer = bufnr,
+							callback = function()
+								-- on 0.8, you should use vim.lsp.buf.format({ bufnr = bufnr }) instead
+								vim.lsp.buf.format({ bufnr = bufnr })
+							end,
+						})
+					end
+				end,
+			})
+		end,
+	},
+	{
+		event = "VeryLazy",
+		"neovim/nvim-lspconfig",
+		dependencies = { "williamboman/mason-lspconfig.nvim" },
+	},
+	{
+		"RRethy/nvim-base16",
+		lazy = true,
+	},
+	{
+		"folke/neodev.nvim",
+	},
+	{
+		cmd = "Telescope",
+		keys = {
+			{ "<leader>p", ":Telescope find_files<CR>", desc = "find files" },
+			{ "<leader>P", ":Telescope live_grep<CR>", desc = "grep file" },
+			{ "<leader>rs", ":Telescope resume<CR>", desc = "resume" },
+			{ "<leader>q", ":Telescope oldfiles<CR>", desc = "oldfiles" },
+		},
+		"nvim-telescope/telescope.nvim",
+		tag = "0.1.1",
+		-- or                              , branch = '0.1.1',
+		dependencies = { "nvim-lua/plenary.nvim" },
+	},
+})
+
+-- color scheme
+vim.cmd.colorscheme("base16-tender")
+-- lsp config
 
 -- Global mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
@@ -41,7 +139,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		-- Enable completion triggered by <c-x><c-o>
 		vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
 
-		-- Buffer local mappings.
+		-- Buffer
 		-- See `:help vim.lsp.*` for documentation on any of the below functions
 		local opts = { buffer = ev.buf }
 		vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
@@ -63,116 +161,13 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		end, opts)
 	end,
 })
-
--- lazy.nvim
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
-	vim.fn.system({
-		"git",
-		"clone",
-		"--filter=blob:none",
-		"https://github.com/folke/lazy.nvim.git",
-		"--branch=stable", -- latest stable release
-		lazypath,
-	})
-end
-
-vim.opt.rtp:prepend(lazypath)
-
-require("lazy").setup({
-	{
-		"folke/neodev.nvim",
-		opts = {},
-	},
-	{
-		"RRethy/nvim-base16",
-		lazy = true,
-	},
-	{
-		cmd = "Telescope",
-		keys = {
-			{ "<leader>p", ":Telescope find_files<CR>", desc = "find files" },
-			{ "<leader>P", ":Telescope live_grep<CR>", desc = "grep file, find string in all files" },
-			{ "<leader>rs", ":Telescope resume<CR>", desc = "resume" },
-			{ "<leader>o", ":Telescope oldfiles<CR>", desc = "oldfiles" },
-		},
-		"nvim-telescope/telescope.nvim",
-		tag = "0.1.3",
-		dependencies = { "nvim-lua/plenary.nvim" },
-	},
-	{
-		event = "VeryLazy",
-		"neovim/nvim-lspconfig",
-		dependencies = { "williamboman/mason-lspconfig.nvim" },
-	},
-	{
-		event = "VeryLazy",
-		"williamboman/mason.nvim",
-	},
-	{
-		event = "VeryLazy",
-		"hrsh7th/nvim-cmp",
-		dependencies = {
-			"neovim/nvim-lspconfig",
-			"hrsh7th/cmp-nvim-lsp",
-			"hrsh7th/cmp-buffer",
-			"hrsh7th/cmp-path",
-			"hrsh7th/cmp-cmdline",
-			"hrsh7th/nvim-cmp",
-			"L3MON4D3/LuaSnip",
-		},
-	},
-	{
-		"windwp/nvim-autopairs",
-		event = "VeryLazy",
-		config = function()
-			require("nvim-autopairs").setup({})
-		end,
-	},
-	{
-		event = "VeryLazy",
-		"jose-elias-alvarez/null-ls.nvim",
-		config = function()
-			local null_ls = require("null-ls")
-			local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
-			null_ls.setup({
-				sources = {
-					null_ls.builtins.formatting.stylua,
-					null_ls.builtins.formatting.black,
-				},
-				on_attach = function(client, bufnr)
-					if client.supports_method("textDocument/formatting") then
-						vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
-						vim.api.nvim_create_autocmd("BufWritePre", {
-							group = augroup,
-							buffer = bufnr,
-							callback = function()
-								-- on 0.8, you should use vim.lsp.buf.format({ bufnr = bufnr }) instead
-								-- on later neovim version, you should use vim.lsp.buf.format({ async = false }) instead
-								vim.lsp.buf.format({ bufnr = bufnr })
-							end,
-						})
-					end
-				end,
-			})
-		end,
-	},
-})
-vim.cmd.colorscheme("base16-tender")
-
-require("neodev").setup({
-	-- add any options here, or leave empty to use the default settings
-})
--- lsp
-local lspconfig = require("lspconfig")
-
 require("mason").setup()
 require("mason-lspconfig").setup()
 
+-- Set up lspconfig.
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
-
-require("lspconfig").pyright.setup({
-	capabilities = capabilities,
+require("neodev").setup({
+	-- add any options here, or leave empty to use the default settings
 })
 
 require("lspconfig").lua_ls.setup({
@@ -209,7 +204,12 @@ require("lspconfig").lua_ls.setup({
 	},
 })
 
---nvim cmp
+require("lspconfig").pyright.setup({
+	capabilities = capabilities,
+})
+
+-- nvim cmp
+-- Set up nvim-cmp.
 local has_words_before = function()
 	unpack = unpack or table.unpack
 	local line, col = unpack(vim.api.nvim_win_get_cursor(0))
@@ -217,14 +217,13 @@ local has_words_before = function()
 end
 
 local luasnip = require("luasnip")
-local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 local cmp = require("cmp")
+local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
 cmp.setup({
 	snippet = {
 		-- REQUIRED - you must specify a snippet engine
 		expand = function(args)
-			-- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
 			require("luasnip").lsp_expand(args.body) -- For `luasnip` users.
 			-- require('snippy').expand_snippet(args.body) -- For `snippy` users.
 			-- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
@@ -261,12 +260,11 @@ cmp.setup({
 		["<C-b>"] = cmp.mapping.scroll_docs(-4),
 		["<C-f>"] = cmp.mapping.scroll_docs(4),
 		["<C-Space>"] = cmp.mapping.complete(),
-		["<C-e>"] = cmp.mapping.abort(),
+		["<C-c>"] = cmp.mapping.abort(),
 		["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
 	}),
 	sources = cmp.config.sources({
 		{ name = "nvim_lsp" },
-		-- { name = 'vsnip' }, -- For vsnip users.
 		{ name = "luasnip" }, -- For luasnip users.
 		-- { name = 'ultisnips' }, -- For ultisnips users.
 		-- { name = 'snippy' }, -- For snippy users.
@@ -278,7 +276,7 @@ cmp.setup({
 -- Set configuration for specific filetype.
 cmp.setup.filetype("gitcommit", {
 	sources = cmp.config.sources({
-		{ name = "git" }, -- You can specify the `git` source if [you were installed it](https://github.com/petertriho/cmp-git).
+		{ name = "cmp_git" }, -- You can specify the `cmp_git` source if you were installed it.
 	}, {
 		{ name = "buffer" },
 	}),
