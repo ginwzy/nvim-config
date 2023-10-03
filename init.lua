@@ -115,11 +115,14 @@ require("lazy").setup({
 		},
 		"nvim-telescope/telescope.nvim",
 		tag = "0.1.1",
-		-- or                              , branch = '0.1.1',
 		dependencies = { "nvim-lua/plenary.nvim" },
 	},
 	{
 		"tpope/vim-fugitive",
+		config = function()
+			vim.cmd.cnoreabbrev([[git Git]])
+			vim.cmd.cnoreabbrev([[gp Git push]])
+		end,
 		cmd = "Git",
 	},
 	{
@@ -128,6 +131,10 @@ require("lazy").setup({
 		config = function()
 			require("gitsigns").setup()
 		end,
+	},
+	{
+		event = "VeryLazy",
+		"tpope/vim-rhubarb",
 	},
 })
 
