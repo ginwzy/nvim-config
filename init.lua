@@ -55,6 +55,7 @@ require("lazy").setup({
 				autocmd FileType nerdtree setlocal relativenumber
 			]])
 		end,
+		dependencies = { "Xuyuanp/nerdtree-git-plugin" },
 	},
 	{
 		event = "VeryLazy",
