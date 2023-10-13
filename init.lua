@@ -41,6 +41,10 @@ end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
 	{
+		"stevedylandev/flexoki-nvim",
+		name = "flexoki",
+	},
+	{
 		"folke/persistence.nvim",
 		event = "BufReadPre", -- this will only start session saving when an actual file was opened
 		opts = {
@@ -255,7 +259,8 @@ require("lazy").setup({
 })
 
 -- color scheme
-vim.cmd.colorscheme("base16-tender")
+-- vim.cmd.colorscheme("base16-tender")
+vim.cmd.colorscheme("flexoki")
 -- lsp config
 
 -- Global mappings.
@@ -339,6 +344,10 @@ require("lspconfig").lua_ls.setup({
 })
 
 require("lspconfig").pyright.setup({
+	capabilities = capabilities,
+})
+
+require("lspconfig").rust_analyzer.setup({
 	capabilities = capabilities,
 })
 
