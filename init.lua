@@ -25,8 +25,7 @@ vim.keymap.set("n", "<Leader>[", "<C-o>", opt)
 vim.keymap.set("n", "<Leader>]", "<C-i>", opt)
 -- https://www.reddit.com/r/vim/comments/2k4cbr/problem_with_gj_and_gk/
 vim.keymap.set("n", "j", [[v:count ? 'j' : 'gj']], { noremap = true, expr = true })
-vim.keymap.set("n", "k", [[v:count ? 'k' : 'gk']], { noremap = true, expr = true })
--- lazy.nvim
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
 	vim.fn.system({
@@ -42,10 +41,8 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins")
 
 -- color scheme
-vim.cmd.colorscheme("base16-tender")
--- vim.cmd.colorscheme("flexoki")
--- lsp config
 
+-- lsp config
 -- Global mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
 vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float)
@@ -92,13 +89,12 @@ require("neodev").setup({
 	-- add any options here, or leave empty to use the default settings
 })
 
-
 -- Lua
 require("lsp-colors").setup({
 	Error = "#db4b4b",
 	Warning = "#e0af68",
 	Information = "#0db9d7",
-	Hint = "#10B981"
+	Hint = "#10B981",
 })
 
 require("lspconfig").lua_ls.setup({
@@ -135,25 +131,24 @@ require("lspconfig").lua_ls.setup({
 	},
 })
 
-
-vim.api.nvim_create_autocmd('FileType', {
-	pattern = 'sh',
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "sh",
 	callback = function()
 		vim.lsp.start({
-			name = 'bash-language-server',
-			cmd = { 'bash-language-server', 'start' },
+			name = "bash-language-server",
+			cmd = { "bash-language-server", "start" },
 		})
 	end,
 })
 
 -- set telescope themes
-require("telescope").setup {
+require("telescope").setup({
 	pickers = {
 		find_files = {
 			theme = "dropdown",
 		},
-	}
-}
+	},
+})
 
 require("lspconfig").pyright.setup({
 	capabilities = capabilities,
@@ -163,16 +158,16 @@ require("lspconfig").rust_analyzer.setup({
 	capabilities = capabilities,
 })
 
-require("rust-tools").setup {
+require("rust-tools").setup({
 	server = {
 		on_attach = function(_, bufnr)
 			--Hover actions
 			vim.keymap.set("n", "<C-Space", require("rust-tools").hover_actions, { buffer = bufnr })
 			-- Code action groups
 			vim.keymap.set("n", "<Leader>a", require("rust-tools").code_action_group, { buffer = bufnr })
-		end
-	}
-}
+		end,
+	},
+})
 
 -- nvim cmp
 -- Set up nvim-cmp.

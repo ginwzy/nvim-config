@@ -18,4 +18,10 @@ return {
 		event = "VeryLazy",
 		"tpope/vim-rhubarb",
 	},
+	{
+		"kdheepak/lazygit.nvim",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+		},
+	},
 }
